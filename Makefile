@@ -13,5 +13,19 @@ createUser:
 createExtension: 
 	docker exec -it postgres13-LetsGoFurther psql -U postgres -d greenlight -c "CREATE EXTENSION IF NOT EXISTS citext;"
 
+genMigrateFile:
+	migrate create -seq -ext=.sql -dir=./migrations $(des)
 
-.PHONY: pullImage postgres createdb createUser 
+migrateCheck:
+	migrate -path=./migrations -database=$(TEST_GREENLIGHT_DB_DSN) version
+
+migrateUp:
+	migrate -path=./migrations -database=$(TEST_GREENLIGHT_DB_DSN) up
+
+migrateDown:
+	migrate -path=./migrations -database=$(TEST_GREENLIGHT_DB_DSN) down
+
+migrateToVersion:
+	migrate -path=./migrations -database=$(TEST_GREENLIGHT_DB_DSN) goto $(version)
+
+.PHONY: pullImage postgres createdb createUser genMigrateFile migrateCheck migrateUp migrateDown migrateToVersion
