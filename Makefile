@@ -1,7 +1,7 @@
 pullImage:
 	docker pull postgres:13-alpine
 
-postgres:
+createContainer:
 	docker run --name postgres13-LetsGoFurther -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -d postgres:13-alpine
 
 createdb:
