@@ -197,7 +197,18 @@ func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err := app.writeJSON(w, http.StatusOK, envelope{"input": input}, nil)
+	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	if len(movies) < 1 {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"movies": movies}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
