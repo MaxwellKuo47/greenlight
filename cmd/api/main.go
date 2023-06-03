@@ -4,9 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -73,34 +70,10 @@ func main() {
 		models: data.NewModels(db),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		ErrorLog:     log.New(logger, "", 0),
+	err = app.serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
-
-	logger.PrintInfo("starting server", map[string]string{
-		"addr": srv.Addr,
-		"env":  cfg.env,
-	})
-
-	logger.PrintInfo("db config info", map[string]string{
-		"db-max-open-conns": fmt.Sprintf("%v", cfg.db.maxOpenConns),
-		"db-max-idle-conns": fmt.Sprintf("%v", cfg.db.maxIdleConns),
-		"db-max-idle-time":  cfg.db.maxIdleTime,
-	})
-
-	logger.PrintInfo("rate limiter info", map[string]string{
-		"limiter-rps":     fmt.Sprintf("%v", cfg.limiter.rps),
-		"limiter-burst":   fmt.Sprintf("%v", cfg.limiter.burst),
-		"limiter-enabled": fmt.Sprintf("%v", cfg.limiter.enabled),
-	})
-
-	err = srv.ListenAndServe()
-	logger.PrintFatal(err, nil)
 }
 
 func OpenDB(cfg config) (*sql.DB, error) {
