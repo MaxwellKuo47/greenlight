@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"html/template"
-	"log"
 	"time"
 
 	"github.com/go-mail/mail/v2"
@@ -21,10 +20,6 @@ type Mailer struct {
 func New(host string, port int, username, password, sender string) Mailer {
 	dialer := mail.NewDialer(host, port, username, password)
 	dialer.Timeout = 5 * time.Second
-	_, err := dialer.Dial()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	return Mailer{
 		dialer: dialer,
@@ -63,10 +58,14 @@ func (m Mailer) Send(recipient, templateFile string, data any) error {
 	msg.SetBody("text/plain", plainBody.String())
 	msg.AddAlternative("text/html", htmlBody.String())
 
-	err = m.dialer.DialAndSend(msg)
-	if err != nil {
-		return err
+	for i := 0; i < 3; i++ {
+		err = m.dialer.DialAndSend(msg)
+
+		if err == nil {
+			return nil
+		}
+		time.Sleep(3 * time.Second)
 	}
 
-	return nil
+	return err
 }
