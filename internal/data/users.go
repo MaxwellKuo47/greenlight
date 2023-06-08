@@ -170,3 +170,7 @@ func (m UserModel) Update(user *User) error {
 	}
 	return nil
 }
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
+	return nil, nil
+}
